@@ -1,23 +1,58 @@
 import { FIELD_MAPPINGS } from './config.js';
 
 export class FieldMapper {
-    constructor(container) {
+    constructor(container, rowSelector) {
         this.container = container;
+        this.rowSelector = rowSelector;
         this.mappings = new Map();
         this.excelHeaders = [];
-        this.previewData = [];
+        this.allData = [];
+        this.selectedRowIndex = 1; // Default to first data row
     }
 
-    setHeaders(headers, firstRowData) {
-        this.excelHeaders = headers;
-        this.previewData = firstRowData;
+    setData(jsonData) {
+        if (jsonData.length < 2) {
+            throw new Error('Invalid file format: File must contain at least 2 rows');
+        }
+
+        this.excelHeaders = jsonData[0];
+        this.allData = jsonData.slice(1); // Store all data rows
+        this.populateRowSelector();
         this.createMappingInterface();
+    }
+
+    populateRowSelector() {
+        this.rowSelector.innerHTML = '';
+        
+        // Add options for each data row
+        this.allData.forEach((row, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            
+            // Create a preview of the row using the first few fields
+            const preview = this.createRowPreview(row);
+            option.textContent = `Row ${index + 1}: ${preview}`;
+            
+            this.rowSelector.appendChild(option);
+        });
+
+        // Handle row selection change
+        this.rowSelector.addEventListener('change', (e) => {
+            this.selectedRowIndex = parseInt(e.target.value);
+            this.updateAllPreviews();
+        });
+    }
+
+    createRowPreview(row) {
+        // Use the first non-empty value as preview
+        const previewValue = row.find(cell => cell && cell.toString().trim() !== '') || 'Empty row';
+        return this.truncateText(previewValue.toString(), 40);
     }
 
     createMappingInterface() {
         this.container.innerHTML = '';
         
-        // Create mapping rows for each required field
+        // Create mapping rows for each field
         Object.entries(FIELD_MAPPINGS).forEach(([fieldId, fieldLabel]) => {
             const row = this.createMappingRow(fieldId, fieldLabel);
             this.container.appendChild(row);
@@ -95,10 +130,22 @@ export class FieldMapper {
             return;
         }
 
-        const previewValue = this.previewData[columnIndex];
+        const previewValue = this.allData[this.selectedRowIndex][columnIndex];
         previewElement.textContent = previewValue ? 
-            `Preview: ${this.truncateText(previewValue, 30)}` : 
+            `Preview: ${this.truncateText(previewValue.toString(), 30)}` : 
             'No preview available';
+    }
+
+    updateAllPreviews() {
+        // Update all preview elements when row selection changes
+        const mappingRows = this.container.querySelectorAll('.mapping-row');
+        mappingRows.forEach(row => {
+            const select = row.querySelector('select');
+            const preview = row.querySelector('.mapping-preview');
+            if (select.value) {
+                this.updatePreview(preview, select.value);
+            }
+        });
     }
 
     truncateText(text, maxLength) {
@@ -109,6 +156,10 @@ export class FieldMapper {
 
     getMappings() {
         return this.mappings;
+    }
+
+    getSelectedData() {
+        return this.allData[this.selectedRowIndex];
     }
 
     validateMappings() {
