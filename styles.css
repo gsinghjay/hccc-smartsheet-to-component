@@ -1,0 +1,43 @@
+.profile-image-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border: none;
+    margin-bottom: 30px;
+}
+
+.profile-field {
+    margin-bottom: 15px;
+}
+
+.profile-field-label {
+    font-weight: bold;
+    color: #666;
+    font-size: 0.9em;
+    text-transform: uppercase;
+}
+
+.profile-field-value {
+    color: #333;
+    font-size: 1.1em;
+}
+
+.quote {
+    font-style: italic;
+    color: #666;
+    border-left: 3px solid #007bff;
+    padding-left: 15px;
+    margin: 20px 0;
+}
+
+.pronouns {
+    display: inline-block;
+    background-color: #e9ecef;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+    color: #495057;
+} 
