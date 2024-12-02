@@ -131,4 +131,61 @@
     color: #6c757d;
     font-size: 0.875rem;
     padding-left: 1rem;
+}
+
+/* Code Preview Styles */
+.code-container {
+    position: relative;
+    margin: 1rem 0;
+    border-radius: 4px;
+    background: #272822;
+}
+
+.code-container pre {
+    margin: 0;
+    padding: 1rem;
+    max-height: 500px;
+    overflow: auto;
+}
+
+.code-container code {
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Custom scrollbar for code containers */
+.code-container pre::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.code-container pre::-webkit-scrollbar-track {
+    background: #1e1f1c;
+}
+
+.code-container pre::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.code-container pre::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Row Selector Styles */
+#rowSelector {
+    max-width: 100%;
+    margin-bottom: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .row > div {
+        margin-bottom: 2rem;
+    }
+    
+    .code-container {
+        margin-bottom: 2rem;
+    }
 } 

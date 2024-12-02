@@ -9,13 +9,16 @@
     <link href="styles.css" rel="stylesheet">
     <!-- XLSX Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Prism.js for code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet" />
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container-fluid mt-4">
         <!-- Header -->
         <div class="text-center mb-4">
             <h1>Profile Generator</h1>
-            <p class="text-muted">Upload an XLSX file to generate a profile</p>
+            <p class="text-muted">Upload an XLSX file to generate profile components</p>
         </div>
 
         <!-- Step Progress -->
@@ -26,11 +29,11 @@
             </div>
             <div class="step" id="step-map">
                 <div class="step-number">2</div>
-                <div class="step-label">Map Fields</div>
+                <div class="step-label">Map & Select</div>
             </div>
             <div class="step" id="step-preview">
                 <div class="step-number">3</div>
-                <div class="step-label">Preview</div>
+                <div class="step-label">Generate</div>
             </div>
         </div>
 
@@ -40,7 +43,7 @@
                 <h5 class="card-title">Upload XLSX File</h5>
                 <div class="mb-3">
                     <input type="file" class="form-control" id="xlsxFile" accept=".xlsx" />
-                    <div class="form-text">Please upload an Excel file with the required profile information.</div>
+                    <div class="form-text">Please upload an Excel file with the profile information.</div>
                 </div>
                 <div class="progress mb-3" style="display: none;">
                     <div class="progress-bar" role="progressbar" style="width: 0%"></div>
@@ -52,39 +55,56 @@
         <!-- Field Mapping Section -->
         <div class="card mb-4" id="mapping-section" style="display: none;">
             <div class="card-body">
-                <h5 class="card-title">Map Fields</h5>
-                <p class="card-text mb-4">Match your Excel columns with the required fields below:</p>
-                
-                <div id="mapping-container">
-                    <!-- Mapping fields will be dynamically added here -->
+                <div class="row">
+                    <!-- Row Selection -->
+                    <div class="col-md-4">
+                        <h5 class="card-title">Select Profile</h5>
+                        <div class="mb-3">
+                            <select class="form-select" id="rowSelector">
+                                <!-- Options will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Field Mapping -->
+                    <div class="col-md-8">
+                        <h5 class="card-title">Map Fields</h5>
+                        <div id="mapping-container">
+                            <!-- Mapping fields will be dynamically added here -->
+                        </div>
+                    </div>
                 </div>
-
                 <div class="mt-4">
                     <button class="btn btn-secondary me-2" id="backToUpload">Back</button>
-                    <button class="btn btn-primary" id="processButton">Process File</button>
+                    <button class="btn btn-primary" id="processButton">Generate Code</button>
                 </div>
             </div>
         </div>
 
-        <!-- Profile Container -->
-        <div id="profile-container" class="card" style="display: none;">
+        <!-- Preview Section -->
+        <div id="preview-section" class="card" style="display: none;">
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4">
-                        <!-- Profile Image Placeholder -->
-                        <div class="profile-image-container mb-3">
-                            <img src="https://via.placeholder.com/200" class="img-fluid rounded-circle" alt="Profile Image">
+                    <!-- JSON Data -->
+                    <div class="col-md-6">
+                        <h5 class="card-title">JSON Data</h5>
+                        <div class="code-container">
+                            <pre><code class="language-json" id="jsonPreview"></code></pre>
                         </div>
                     </div>
-                    <div class="col-md-8">
-                        <!-- Profile Information -->
-                        <div id="profile-info">
-                            <div class="text-center text-muted">
-                                <p>No profile data loaded yet.</p>
-                                <p>Upload an XLSX file to view the profile.</p>
-                            </div>
+                    <!-- Component Code -->
+                    <div class="col-md-6">
+                        <h5 class="card-title">Component Code</h5>
+                        <div class="code-container">
+                            <pre><code class="language-html" id="componentPreview"></code></pre>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary btn-sm" id="copyJson">Copy JSON</button>
+                            <button class="btn btn-primary btn-sm ms-2" id="copyComponent">Copy Component</button>
                         </div>
                     </div>
+                </div>
+                <div class="mt-4">
+                    <button class="btn btn-secondary" id="backToMapping">Back to Mapping</button>
                 </div>
             </div>
         </div>
@@ -92,6 +112,10 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Prism.js for code highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
     <!-- Application Scripts -->
     <script type="module" src="js/main.js"></script>
 </body>

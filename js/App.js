@@ -18,19 +18,27 @@ export class App {
             (progress) => this.uiRenderer.showProgress(progress)
         );
         this.fieldMapper = new FieldMapper(
-            document.getElementById('mapping-container')
+            document.getElementById('mapping-container'),
+            document.getElementById('rowSelector')
         );
 
         // Initialize UI elements
         this.fileInput = document.getElementById(UI_ELEMENTS.fileInput);
         this.uploadButton = document.getElementById('uploadButton');
         this.processButton = document.getElementById('processButton');
-        this.backButton = document.getElementById('backToUpload');
+        this.backToUploadButton = document.getElementById('backToUpload');
+        this.backToMappingButton = document.getElementById('backToMapping');
+        this.copyJsonButton = document.getElementById('copyJson');
+        this.copyComponentButton = document.getElementById('copyComponent');
         
         // Sections
         this.uploadSection = document.getElementById('upload-section');
         this.mappingSection = document.getElementById('mapping-section');
-        this.profileContainer = document.getElementById('profile-container');
+        this.previewSection = document.getElementById('preview-section');
+
+        // Preview elements
+        this.jsonPreview = document.getElementById('jsonPreview');
+        this.componentPreview = document.getElementById('componentPreview');
 
         // Steps
         this.steps = {
@@ -44,7 +52,10 @@ export class App {
         this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
         this.uploadButton.addEventListener('click', () => this.handleUpload());
         this.processButton.addEventListener('click', () => this.processFile());
-        this.backButton.addEventListener('click', () => this.goToStep('upload'));
+        this.backToUploadButton.addEventListener('click', () => this.goToStep('upload'));
+        this.backToMappingButton.addEventListener('click', () => this.goToStep('map'));
+        this.copyJsonButton.addEventListener('click', () => this.copyToClipboard('json'));
+        this.copyComponentButton.addEventListener('click', () => this.copyToClipboard('component'));
     }
 
     handleFileSelect(event) {
@@ -63,11 +74,8 @@ export class App {
             // Read file
             const jsonData = await this.fileHandler.readXLSXFile(file);
             
-            // Store the data for later processing
-            this.rawData = jsonData;
-
-            // Setup mapping interface
-            this.fieldMapper.setHeaders(jsonData[0], jsonData[1]);
+            // Setup mapping interface with all data
+            this.fieldMapper.setData(jsonData);
 
             // Move to mapping step
             this.goToStep('map');
@@ -83,26 +91,55 @@ export class App {
             // Validate mappings
             this.fieldMapper.validateMappings();
 
-            // Process data with mappings
+            // Get selected row data and process with mappings
+            const selectedData = this.fieldMapper.getSelectedData();
             const processedData = this.dataProcessor.processDataWithMappings(
-                this.rawData,
+                [this.fieldMapper.excelHeaders, selectedData],
                 this.fieldMapper.getMappings()
             );
 
+            // Generate component code
+            const componentCode = this.generateComponentCode(processedData);
+
             // Display results
-            this.uiRenderer.showProgress(90);
-            this.uiRenderer.displayProfile(processedData);
-            this.uiRenderer.showProgress(100);
+            this.displayPreviews(processedData, componentCode);
 
             // Move to preview step
             this.goToStep('preview');
 
-            // Hide progress after a delay
-            setTimeout(() => this.uiRenderer.hideProgress(), 1000);
-
         } catch (error) {
-            this.uiRenderer.hideProgress();
             this.uiRenderer.showError(error.message);
+        }
+    }
+
+    generateComponentCode(data) {
+        // Generate the exact format required
+        return `~[com[25306 1 72${JSON.stringify({
+            version: 72,
+            data: data.data
+        })}]]~`;
+    }
+
+    displayPreviews(jsonData, componentCode) {
+        // Display JSON with syntax highlighting
+        this.jsonPreview.textContent = JSON.stringify(jsonData, null, 2);
+        Prism.highlightElement(this.jsonPreview);
+
+        // Display component code with syntax highlighting
+        this.componentPreview.textContent = componentCode;
+        Prism.highlightElement(this.componentPreview);
+    }
+
+    async copyToClipboard(type) {
+        const text = type === 'json' ? 
+            this.jsonPreview.textContent : 
+            this.componentPreview.textContent;
+
+        try {
+            await navigator.clipboard.writeText(text);
+            this.uiRenderer.showSuccess(`${type === 'json' ? 'JSON' : 'Component code'} copied to clipboard`);
+        } catch (err) {
+            this.uiRenderer.showError('Failed to copy to clipboard');
         }
     }
 
@@ -126,7 +163,7 @@ export class App {
         // Show/hide sections
         this.uploadSection.style.display = step === 'upload' ? 'block' : 'none';
         this.mappingSection.style.display = step === 'map' ? 'block' : 'none';
-        this.profileContainer.style.display = step === 'preview' ? 'block' : 'none';
+        this.previewSection.style.display = step === 'preview' ? 'block' : 'none';
     }
 
     getStepOrder(step) {
